@@ -32,6 +32,16 @@
             align-items: center;
         }
 
+        /* Starfield Canvas */
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
         /* Arcade Grid Background */
         body::before {
             content: '';
@@ -42,7 +52,37 @@
                 linear-gradient(90deg, transparent 24%, rgba(0, 245, 255, .1) 25%, rgba(0, 245, 255, .1) 26%, transparent 27%);
             background-size: 40px 40px;
             transform: perspective(500px) rotateX(60deg);
-            z-index: 0;
+            z-index: 1;
+            opacity: 0.6;
+        }
+
+        /* Score Display */
+        .score-panel {
+            position: relative;
+            z-index: 15;
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            font-size: 0.8rem;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 10px var(--neon-yellow);
+            margin-bottom: 20px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 0.6rem;
+            margin-bottom: 5px;
+            opacity: 0.8;
+        }
+
+        .score-value {
+            font-size: 1.2rem;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 15px var(--neon-cyan);
         }
 
         .container {
@@ -96,6 +136,12 @@
             font-family: 'Press Start 2P', cursive;
             cursor: pointer;
             box-shadow: 0 0 15px var(--neon-yellow);
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px var(--neon-yellow);
         }
 
         button:active { transform: scale(0.95); }
@@ -118,12 +164,45 @@
                 opacity: 0; 
             }
         }
+
+        /* Star styles */
+        .star {
+            position: absolute;
+            background: white;
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+        }
+
+        @media (max-width: 600px) {
+            .score-panel {
+                gap: 20px;
+                font-size: 0.7rem;
+            }
+            
+            .score-value {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Starfield Canvas -->
+    <canvas id="starfield"></canvas>
 
     <div class="container">
         <h1>DAD JOKE ARCADE</h1>
+        
+        <!-- Score Panel -->
+        <div class="score-panel">
+            <div class="score-item">
+                <div class="score-label">SCORE</div>
+                <div class="score-value" id="score">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">HIGH SCORE</div>
+                <div class="score-value" id="highScore">50</div>
+            </div>
+        </div>
+
         <div id="joke">READY PLAYER ONE...</div>
         
         <div class="controls">
@@ -137,16 +216,117 @@
     <audio id="laughTrack" src="laughter.wav"></audio>
 
     <script>
+        // Score System
+        let score = 0;
+        let highScore = localStorage.getItem('dadJokeHighScore') || 50;
+        
+        document.getElementById('score').textContent = score;
+        document.getElementById('highScore').textContent = highScore;
+
+        function updateScore() {
+            score++;
+            document.getElementById('score').textContent = score;
+            
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('dadJokeHighScore', highScore);
+                document.getElementById('highScore').textContent = highScore;
+                
+                // Flash high score when beaten
+                const highScoreEl = document.getElementById('highScore');
+                highScoreEl.style.animation = 'none';
+                setTimeout(() => {
+                    highScoreEl.style.animation = 'scoreFlash 0.5s ease-in-out 3';
+                }, 10);
+            }
+        }
+
+        // Add flash animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes scoreFlash {
+                0%, 100% { color: var(--neon-cyan); transform: scale(1); }
+                50% { color: var(--neon-yellow); transform: scale(1.2); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Starfield Animation
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const stars = [];
+        const starCount = 200;
+
+        class Star {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + Math.random() * 100;
+                this.size = Math.random() * 2.5 + 0.5;
+                this.speed = Math.random() * 2 + 1;
+                this.opacity = Math.random() * 0.5 + 0.5;
+            }
+
+            update() {
+                this.y -= this.speed;
+                
+                // Reset star when it goes off top of screen
+                if (this.y < -10) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.shadowBlur = 4;
+                ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // Initialize stars
+        for (let i = 0; i < starCount; i++) {
+            const star = new Star();
+            star.y = Math.random() * canvas.height; // Distribute initially
+            stars.push(star);
+        }
+
+        function animateStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+
+            requestAnimationFrame(animateStars);
+        }
+
+        animateStars();
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
         function emojiExplosion() {
             const emojis = ['😂', '🤣', '😆', '🔥', '✨', '💀'];
-            const count = 24; // Number of particles
+            const count = 24;
             
             for (let i = 0; i < count; i++) {
                 const p = document.createElement('div');
                 p.className = 'emoji-particle';
                 p.innerText = emojis[Math.floor(Math.random() * emojis.length)];
                 
-                // Randomize trajectory
                 const angle = Math.random() * Math.PI * 2;
                 const distance = 150 + Math.random() * 250;
                 const x = Math.cos(angle) * distance;
@@ -177,6 +357,9 @@
                 const data = await res.json();
                 display.innerText = data.joke;
 
+                // Update score
+                updateScore();
+
                 if (vOn) {
                     window.speechSynthesis.cancel();
                     const msg = new SpeechSynthesisUtterance(data.joke);
@@ -202,4 +385,3 @@
     </script>
 </body>
 </html>
-
