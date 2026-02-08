@@ -6,10 +6,6 @@
     <title>DAD JOKE ARCADE</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Righteous&display=swap" rel="stylesheet">
     <script defer src="https://cloud.umami.is/script.js" data-website-id="85484b55-b012-4463-b404-d7e3f39087f3"></script>
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -374,8 +370,9 @@
             button.disabled = true;
             lastClickTime = currentTime;
 
-            // Change button text after first click
+            // Change button text immediately after first click
             if (isFirstClick) {
+                button.textContent = "MORE LAUGHS";
                 isFirstClick = false;
             }
 
@@ -413,10 +410,9 @@
                 display.innerText = "CONNECTION LOST!";
             }
 
-            // Re-enable button after cooldown and update text
+            // Re-enable button after cooldown
             setTimeout(() => {
                 button.disabled = false;
-                button.textContent = "MORE LAUGHS";
             }, COOLDOWN_MS);
         }
     </script>
