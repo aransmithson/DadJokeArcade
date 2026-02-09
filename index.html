@@ -98,12 +98,78 @@
         }
 
         h1 {
-            font-size: clamp(1.2rem, 5vw, 2rem);
+            font-size: clamp(0.9rem, 3.5vw, 1.4rem);
             margin-bottom: 20px;
             color: var(--neon-cyan);
             text-shadow: 0 0 10px var(--neon-cyan);
+            line-height: 1.2;
         }
 
+        /* Animated letter styles */
+        .letter {
+            display: inline-block;
+            animation: letterGlow 2s ease-in-out infinite;
+            animation-delay: calc(var(--index) * 0.1s);
+        }
+
+        @keyframes letterGlow {
+            0%, 100% {
+                color: var(--neon-cyan);
+                text-shadow: 0 0 10px var(--neon-cyan);
+                transform: translateY(0);
+            }
+            50% {
+                color: var(--neon-pink);
+                text-shadow: 
+                    0 0 20px var(--neon-pink),
+                    0 0 30px var(--neon-pink),
+                    0 0 40px var(--neon-pink);
+                transform: translateY(-3px);
+            }
+        }
+
+        .title {
+            display: block;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+
+        /* Corner emoji animations */
+        .corner-emoji {
+            position: absolute;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            filter: drop-shadow(0 0 8px rgba(255, 234, 0, 0.8));
+            animation: 
+                emojiRock 2s ease-in-out infinite,
+                emojiPulse 2.5s ease-in-out infinite;
+        }
+
+        .corner-emoji.top-left {
+            top: 15px;
+            left: 15px;
+        }
+
+        .corner-emoji.top-right {
+            top: 15px;
+            right: 15px;
+            animation-delay: 0.3s;
+        }
+
+        @keyframes emojiRock {
+            0%, 100% { transform: rotate(-15deg); }
+            50% { transform: rotate(15deg); }
+        }
+
+        @keyframes emojiPulse {
+            0%, 100% { transform: scale(1) rotate(-15deg); }
+            25% { transform: scale(1) rotate(15deg); }
+            50% { transform: scale(1.2) rotate(-15deg); }
+            75% { transform: scale(1) rotate(15deg); }
+        }
+
+
+            
         #joke {
             font-family: 'Righteous', cursive;
             font-size: clamp(1.1rem, 4vw, 1.5rem);
@@ -163,6 +229,29 @@
             animation: explodeOut 1.2s ease-out forwards;
         }
 
+        footer.poweredby {
+            position: fixed;
+            bottom: 12px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 0.5rem;
+            color: rgba(255, 255, 255, 0.6);
+            z-index: 20;
+            pointer-events: auto;
+        }
+
+        footer.poweredby a {
+            color: rgba(0, 245, 255, 0.7);
+            text-decoration: none;
+        }
+
+        footer.poweredby a:hover {
+            color: rgba(0, 245, 255, 1);
+            text-shadow: 0 0 6px rgba(0, 245, 255, 0.8);
+        }
+
+
         @keyframes explodeOut {
             0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
             100% { 
@@ -195,7 +284,13 @@
     <canvas id="starfield"></canvas>
 
     <div class="container">
-        <h1>DAD JOKE ARCADE</h1>
+        <span class="corner-emoji top-left">😂</span>
+        <span class="corner-emoji top-right">😂</span>
+        
+        <h1 class="title neon-scan" id="arcadeTitle">
+            DAD JOKE ARCADE
+        </h1>
+
         
         <!-- Score Panel -->
         <div class="score-panel">
@@ -219,9 +314,58 @@
         <button onclick="playArcadeJoke()">GET JOKE</button>
     </div>
 
+    <footer class="poweredby">
+        Powered by <a href="https://icanhazdadjoke.com" target="_blank" rel="noopener">icanhazdadjoke.com</a>
+    </footer>
+
+
     <audio id="laughTrack" src="laughter.wav"></audio>
 
     <script>
+        // Animate title letters
+        const titleElement = document.getElementById('arcadeTitle');
+        const line1 = 'DAD JOKE';
+        const line2 = 'ARCADE';
+        
+        // Clear existing text
+        titleElement.innerHTML = '';
+        
+        let charIndex = 0;
+        
+        // Add first line
+        line1.split('').forEach((char) => {
+            const span = document.createElement('span');
+            span.textContent = char;
+            if (char !== ' ') {
+                span.className = 'letter';
+                span.style.setProperty('--index', charIndex);
+                charIndex++;
+            } else {
+                span.style.display = 'inline-block';
+                span.style.width = '0.5em';
+            }
+            titleElement.appendChild(span);
+        });
+        
+        // Add line break
+        const br = document.createElement('br');
+        titleElement.appendChild(br);
+        
+        // Add second line
+        line2.split('').forEach((char) => {
+            const span = document.createElement('span');
+            span.textContent = char;
+            if (char !== ' ') {
+                span.className = 'letter';
+                span.style.setProperty('--index', charIndex);
+                charIndex++;
+            } else {
+                span.style.display = 'inline-block';
+                span.style.width = '0.5em';
+            }
+            titleElement.appendChild(span);
+        });
+
         // Score System
         let score = 0;
         let highScore = localStorage.getItem('dadJokeHighScore') || 50;
