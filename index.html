@@ -85,6 +85,21 @@
             text-shadow: 0 0 15px var(--neon-cyan);
         }
 
+        .powered-by {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: #0f0;                /* green for contrast */
+  background: rgba(0,0,0,0.5);
+  border-top: 1px solid #0ff;
+  margin-top: auto;           /* ← pushes it to bottom! */
+}
+
+.powered-by a {
+  color: #0ff;
+  text-decoration: underline;
+}
+
         .container {
             position: relative;
             z-index: 10;
@@ -218,9 +233,13 @@
 
         <button onclick="playArcadeJoke()">GET JOKE</button>
     </div>
-    <div class="container">
-        <h4>powered by <a href="https://icanhazdadjoke.com/">icanhazdadjokes.com</a></h4>
-    </div>
+  <body>
+
+  <!-- powered-by now at bottom -->
+  <footer class="powered-by">
+    powered by <a href="https://icanhazdadjokes.com">icanhazdadjokes.com</a>
+  </footer>
+</body>
     <audio id="laughTrack" src="laughter.wav"></audio>
 
     <script>
